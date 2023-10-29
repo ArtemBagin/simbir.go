@@ -34,6 +34,11 @@ class TransportBase(TransportType):
     day_price: float | None
 
 
+class TransportSchema(TransportBase):
+    id: int
+    owner_id: int
+
+
 class TransportEdit(BaseModel):
     can_be_rented: bool | None = None
     transport_type: str | None = None

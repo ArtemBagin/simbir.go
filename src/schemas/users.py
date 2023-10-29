@@ -15,6 +15,10 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserSchema(UserRead, UserCreate):
+    ...
+
+
 class UserAdmin(UserBase):
     username: str | None = None
     balance: int | None = None

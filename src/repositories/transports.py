@@ -1,5 +1,5 @@
 from models.transports import Transports
-from repositories.repository import SQLAlchemyRepository
+from utils.repository import SQLAlchemyRepository
 
 
 class TransportsRepository(SQLAlchemyRepository):

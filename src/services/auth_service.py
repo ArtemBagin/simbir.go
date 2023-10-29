@@ -5,7 +5,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from config import settings
 from models.users import Users
-from repositories.users import UsersRepository
 from schemas.users import TokenResponse
 from security import (
     create_access_token,
@@ -13,29 +12,31 @@ from security import (
     get_token_payload,
     verify_password,
 )
+from utils.unitofwork import UnitOfWork
 
 
-async def get_token(data: OAuth2PasswordRequestForm):
-    user = await UsersRepository().find_one(username=data.username)
+async def get_token(uow: UnitOfWork, data: OAuth2PasswordRequestForm):
+    async with uow:
+        user = await uow.users.find_one(username=data.username)
 
-    if not user:
-        raise HTTPException(
-            status_code=400,
-            detail="User is not registered with us.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        if not user:
+            raise HTTPException(
+                status_code=400,
+                detail="User is not registered with us.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    if not verify_password(data.password, user.password):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid Login Credentials.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        if not verify_password(data.password, user.password):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid Login Credentials.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    return await _get_user_token(user=user)
+        return await _get_user_token(user=user)
 
 
-async def get_refresh_token(token):
+async def get_refresh_token(uow: UnitOfWork, token):
     payload = get_token_payload(token=token)
     user_id: int | None = payload.get('id', None)
     if not user_id:
@@ -44,8 +45,9 @@ async def get_refresh_token(token):
             detail="Invalid refresh token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = await UsersRepository().find_one(id=user_id)
-    return await _get_user_token(user=user, refresh_token=token)
+    async with uow:
+        user = await uow.users.find_one(id=user_id)
+        return await _get_user_token(user=user, refresh_token=token)
 
 
 async def _get_user_token(user: Users, refresh_token=None):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from models.users import Users
+from routers.dependencies import UOWDep
 from schemas.users import UserCreate, UserRead
 from security import get_current_user
 from services import user_service
@@ -13,8 +14,11 @@ router = APIRouter(
 
 
 @router.post('/SignUp', status_code=status.HTTP_201_CREATED)
-async def create_user_router(data: UserCreate):
-    res = await user_service.create_user(data)
+async def create_user_router(
+        uow: UOWDep,
+        data: UserCreate
+):
+    res = await user_service.create_user(uow, data)
     return res
 
 
@@ -25,8 +29,9 @@ def get_user_detail_router(user: Users = Depends(get_current_user)):
 
 @router.put('/Update', status_code=status.HTTP_204_NO_CONTENT)
 async def edit_user_router(
+        uow: UOWDep,
         data: UserCreate,
         user: Users = Depends(get_current_user)
 ):
-    await user_service.update_user(user, data)
+    await user_service.update_user(uow, user, data)
 

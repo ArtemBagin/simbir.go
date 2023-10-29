@@ -28,6 +28,13 @@ class RentBase(RentType):
     price_type: str
 
 
+class RentSchema(RentBase):
+    id: int
+    time_start: datetime | None = None
+    time_end: datetime | None = None
+    final_price: float | None = None
+
+
 class RentEdit(BaseModel):
     transport_id: int | None = None
     user_id: int | None = None

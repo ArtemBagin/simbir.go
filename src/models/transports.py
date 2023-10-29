@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.sqltypes import Boolean, Double, Integer
 
 from database.database import Base
+from schemas.transports import TransportSchema
 
 
 class Transports(Base):
@@ -18,3 +19,19 @@ class Transports(Base):
     longitude: Mapped[float] = mapped_column(Double, nullable=False)
     minute_price: Mapped[float] = mapped_column(Double, name='minutePrice')
     day_price: Mapped[float] = mapped_column(Double, name='dayPrice')
+
+    def to_read_model(self) -> TransportSchema:
+        return TransportSchema(
+            id=self.id,
+            owner_id=self.owner_id,
+            can_be_rented=self.can_be_rented,
+            transport_type=self.transport_type,
+            model=self.model,
+            color=self.color,
+            identifier=self.identifier,
+            description=self.description,
+            latitude=self.latitude,
+            longitude=self.longitude,
+            minute_price=self.minute_price,
+            day_price=self.day_price
+        )

@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import select, update
-
-from database.database import async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class SQLAlchemyRepository:
@@ -11,56 +10,58 @@ class SQLAlchemyRepository:
         detail="Invalid request, no such data exists.",
     )
 
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
     async def add_one(self, data: dict) -> int:
-        async with async_session() as session:
-            res = self.model(**data)
-            session.add(res)
-            await session.commit()
-            return res
+        res = self.model(**data)
+        self.session.add(res)
+        await self.session.commit()
+        return res
 
     async def edit_one(self, id: int, data: dict) -> int:
-        async with async_session() as session:
-            stmt = update(self.model).values(**data).filter_by(id=id).returning(self.model.id)
-            res = await session.execute(stmt)
-            await session.commit()
-            return res.scalar_one()
+        stmt = update(self.model).values(**data).filter_by(id=id).returning(self.model.id)
+        res = await self.session.execute(stmt)
+        await self.session.commit()
+        return res.scalar_one()
 
     async def find_all(self):
-        async with async_session() as session:
-            stmt = select(self.model)
-            res = await session.execute(stmt)
-            res = res.scalars().all()
-            return res
+        stmt = select(self.model)
+        res = await self.session.execute(stmt)
+        res = res.scalars().all()
+        res = [row.to_read_model() for row in res]
+        return res
 
-    async def find_one(self, **filter_by):
-        async with async_session() as session:
-            stmt = select(self.model).filter_by(**filter_by)
-            res = await session.execute(stmt)
-            res = res.first()
-            if not res:
-                raise self.no_data_error
+    async def find_one(self, error=False, raw=False, **filter_by):
+        stmt = select(self.model).filter_by(**filter_by)
+        res = await self.session.execute(stmt)
+        res = res.first()
+        if error:
+            return res
+        if not res:
+            raise self.no_data_error
+        if raw:
             return res[0]
+        res = res[0].to_read_model()
+        return res
 
     async def find(self, **filter_by):
-        async with async_session() as session:
-            stmt = select(self.model).filter_by(**filter_by)
-            res = await session.execute(stmt)
-            res = res.scalars().all()
-            return res
+        stmt = select(self.model).filter_by(**filter_by)
+        res = await self.session.execute(stmt)
+        res = res.scalars().all()
+        res = [row.to_read_model() for row in res]
+        return res
 
     async def delete_one(self, **filter_by):
-        async with async_session() as session:
-            stmt = select(self.model).filter_by(**filter_by)
-            res = await session.execute(stmt)
-            res = res.first()
-            if not res:
-                raise self.no_data_error
-            await session.delete(res[0])
-            await session.commit()
+        stmt = select(self.model).filter_by(**filter_by)
+        res = await self.session.execute(stmt)
+        res = res.first()
+        if not res:
+            raise self.no_data_error
+        await self.session.delete(res[0])
+        await self.session.commit()
 
-    @staticmethod
-    async def save_models(*args):
-        async with async_session() as session:
-            for arg in args:
-                session.add(arg)
-            await session.commit()
+    async def save_models(self, *args):
+        for arg in args:
+            self.session.add(arg)
+        await self.session.commit()
