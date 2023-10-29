@@ -7,7 +7,7 @@ from database.database import async_session
 class SQLAlchemyRepository:
     model = None
     no_data_error = HTTPException(
-        status_code=403,
+        status_code=404,
         detail="Invalid request, no such data exists.",
     )
 
@@ -59,7 +59,7 @@ class SQLAlchemyRepository:
             await session.commit()
 
     @staticmethod
-    async def save_models(self, *args):
+    async def save_models(*args):
         async with async_session() as session:
             for arg in args:
                 session.add(arg)
