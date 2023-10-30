@@ -55,7 +55,7 @@ def get_token_payload(token):
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> Users | None:
     payload = get_token_payload(token)
-    if not payload or type(payload) is not dict:
+    if not payload or not isinstance(payload, dict):
         raise credentials_error
 
     if blacklist.is_token_blacklisted(token):
