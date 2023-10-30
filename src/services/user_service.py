@@ -8,7 +8,7 @@ from utils.unitofwork import UnitOfWork
 
 async def create_user(uow: UnitOfWork, data: UserCreate | UserAdmin):
     async with uow:
-        user = await uow.users.find_one(username=data.username, raw=True)
+        user = await uow.users.find_one(username=data.username, raw=True, no_error=True)
 
         if user:
             raise HTTPException(
@@ -27,7 +27,7 @@ async def create_user(uow: UnitOfWork, data: UserCreate | UserAdmin):
 async def update_user(uow: UnitOfWork, user, data: UserAdmin | UserCreate):
     data.password = get_password_hash(data.password)
     async with uow:
-        named_user = await uow.users.find_one(username=data.username, error=True)
+        named_user = await uow.users.find_one(username=data.username, no_error=True)
         if named_user and named_user.username != user.username:
             raise HTTPException(
                 status_code=422,

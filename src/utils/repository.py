@@ -32,11 +32,11 @@ class SQLAlchemyRepository:
         res = [row.to_read_model() for row in res]
         return res
 
-    async def find_one(self, error=False, raw=False, **filter_by):
+    async def find_one(self, no_error=False, raw=False, **filter_by):
         stmt = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(stmt)
         res = res.first()
-        if error:
+        if no_error:
             return res
         if not res:
             raise self.no_data_error
