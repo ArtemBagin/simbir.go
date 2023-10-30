@@ -42,7 +42,7 @@ async def edit_one_transport(
         if user.id != transport.owner_id and not is_admin:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid request, no such data exists.",
+                detail="This is not your vehicle.",
             )
 
         res = await uow.transports.edit_one(pk, data.model_dump(exclude_none=True))

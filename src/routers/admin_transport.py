@@ -49,7 +49,7 @@ async def edit_one_transport_router(
         data: TransportAdminEdit,
         user: Users = Depends(get_current_admin)
 ):
-    await transport_service.edit_one_transport(uow, user, data, pk)
+    await transport_service.edit_one_transport(uow, user, data, pk, is_admin=True)
 
 
 @router.delete('/{pk}', status_code=status.HTTP_204_NO_CONTENT)

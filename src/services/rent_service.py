@@ -159,7 +159,7 @@ async def create_rent(
         rent: RentBase,
 ):
     async with uow:
-        res = await uow.transports.add_one(rent.model_dump())
+        res = await uow.rents.add_one(rent.model_dump())
         return res
 
 
