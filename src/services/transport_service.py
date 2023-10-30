@@ -5,13 +5,20 @@ from schemas.transports import TransportBase, TransportEdit
 from utils.unitofwork import UnitOfWork
 
 
-async def get_transport_by_id(uow: UnitOfWork, pk: int):
+async def get_transport_by_id(
+        uow: UnitOfWork,
+        pk: int
+):
     async with uow:
         transport = await uow.transports.find_one(id=pk)
         return transport
 
 
-async def create_transport(uow: UnitOfWork, data: TransportBase, owner_id: int = None):
+async def create_transport(
+        uow: UnitOfWork,
+        data: TransportBase,
+        owner_id: int = None
+):
     async with uow:
         if not owner_id:
             res = await uow.transports.add_one(data.model_dump())
@@ -22,7 +29,13 @@ async def create_transport(uow: UnitOfWork, data: TransportBase, owner_id: int =
         return res
 
 
-async def edit_one_transport(uow: UnitOfWork, user: Users, data: TransportEdit, pk, is_admin=False):
+async def edit_one_transport(
+        uow: UnitOfWork,
+        user: Users,
+        data: TransportEdit,
+        pk,
+        is_admin=False
+):
     async with uow:
         transport = await uow.transports.find_one(id=pk)
 
@@ -36,7 +49,12 @@ async def edit_one_transport(uow: UnitOfWork, user: Users, data: TransportEdit, 
         return res
 
 
-async def delete_one_transport(uow: UnitOfWork, user: Users, pk: int, is_admin=False):
+async def delete_one_transport(
+        uow: UnitOfWork,
+        user: Users,
+        pk: int,
+        is_admin=False
+):
     async with uow:
         transport = await uow.transports.find_one(id=pk)
         if user.id != transport.owner_id and not is_admin:

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_algorithm: str
 
+    @property
+    def database_url(self):
+        return f"postgresql+asyncpg://{settings.database_username}:{settings.database_password}@" \
+               f"{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+
 
 settings = Settings()
-

@@ -18,6 +18,6 @@ async def give_money_router(
         account_id: int,
         user: Users = Depends(get_current_user)
 ):
-    await paymant_service.give_money(account_id, user, uow)
+    await paymant_service.give_money(uow, account_id, user)
     return {'status': 'success'}
 

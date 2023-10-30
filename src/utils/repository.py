@@ -36,12 +36,16 @@ class SQLAlchemyRepository:
         stmt = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(stmt)
         res = res.first()
+
         if no_error:
             return res
+
         if not res:
             raise self.no_data_error
+
         if raw:
             return res[0]
+
         res = res[0].to_read_model()
         return res
 

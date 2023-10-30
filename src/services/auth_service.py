@@ -15,7 +15,10 @@ from security import (
 from utils.unitofwork import UnitOfWork
 
 
-async def get_token(uow: UnitOfWork, data: OAuth2PasswordRequestForm):
+async def get_token(
+        uow: UnitOfWork,
+        data: OAuth2PasswordRequestForm
+):
     async with uow:
         user = await uow.users.find_one(username=data.username)
 
@@ -36,7 +39,10 @@ async def get_token(uow: UnitOfWork, data: OAuth2PasswordRequestForm):
         return await _get_user_token(user=user)
 
 
-async def get_refresh_token(uow: UnitOfWork, token):
+async def get_refresh_token(
+        uow: UnitOfWork,
+        token
+):
     payload = get_token_payload(token=token)
     user_id: int | None = payload.get('id', None)
     if not user_id:
@@ -50,7 +56,10 @@ async def get_refresh_token(uow: UnitOfWork, token):
         return await _get_user_token(user=user, refresh_token=token)
 
 
-async def _get_user_token(user: Users, refresh_token=None):
+async def _get_user_token(
+        user: Users,
+        refresh_token=None
+):
     payload = {"id": user.id}
 
     access_token_expire = timedelta(minutes=settings.access_token_expire)
@@ -64,3 +73,4 @@ async def _get_user_token(user: Users, refresh_token=None):
         refresh_token=refresh_token,
         expires_in=access_token_expire.seconds
     )
+

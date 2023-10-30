@@ -23,7 +23,13 @@ def in_circle(x0, y0, r, x1, y1) -> bool:
     return res
 
 
-async def accessible_transport(uow: UnitOfWork, lat: float, long: float, radius: float, transport_type: str):
+async def accessible_transport(
+        uow: UnitOfWork,
+        lat: float,
+        long: float,
+        radius: float,
+        transport_type: str
+):
     async with uow:
         if transport_type != TransportTypes.all:
             res = await uow.transports.find(transport_type=transport_type)
